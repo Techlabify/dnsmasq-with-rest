@@ -54,7 +54,7 @@ app.delete('/static-lease', (req, res) => {
 });
 
 // Get Static Leases
-app.get('/static-leases', (req, res) => {
+app.get('/static-lease', (req, res) => {
 	fs.readFile(LEASE_FILE, "utf8", (err, data) => {
 		if (err) return res.status(500).json({ error: "Failed to read lease file" });
 

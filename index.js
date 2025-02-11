@@ -12,12 +12,22 @@ app.post('/static-lease', (req, res) => {
     const { mac, ip } = req.body;
     if (!mac || !ip) return res.status(400).json({ error: "MAC and IP are required" });
 
-    fs.appendFile(LEASE_FILE, `${mac},${ip}\n`, (err) => {
-        if (err) return res.status(500).json({ error: "Failed to update lease file" });
+    fs.readFile(LEASE_FILE, "utf8", (err, data) => {
+        if (err) return res.status(500).json({ error: "Failed to read lease file" });
 
-        exec("sudo systemctl restart dnsmasq", (error) => {
-            if (error) return res.status(500).json({ error: "Failed to restart dnsmasq" });
-            res.json({ success: true, message: `Static lease added for ${mac} -> ${ip}` });
+        // Remove existing lease for the MAC
+        const updatedLeases = data.split("\n").filter(line => !line.startsWith(mac)).join("\n");
+        
+        // Append the new lease entry
+        const newLeases = `${updatedLeases}\n${mac},${ip}\n`;
+
+        fs.writeFile(LEASE_FILE, newLeases.trim() + "\n", (err) => {
+            if (err) return res.status(500).json({ error: "Failed to update lease file" });
+
+            exec("sudo systemctl restart dnsmasq", (error) => {
+                if (error) return res.status(500).json({ error: "Failed to restart dnsmasq" });
+                res.json({ success: true, message: `Static lease added for ${mac} -> ${ip}` });
+            });
         });
     });
 });
@@ -41,6 +51,20 @@ app.delete('/static-lease', (req, res) => {
             });
         });
     });
+});
+
+// Get Static Leases
+app.get('/static-leases', (req, res) => {
+	fs.readFile(LEASE_FILE, "utf8", (err, data) => {
+		if (err) return res.status(500).json({ error: "Failed to read lease file" });
+
+		const leases = data.split("\n").map(line => {
+			const [mac, ip] = line.split(",");
+			return { mac, ip };
+		});
+
+		res.json(leases);
+	});
 });
 
 // Start the server

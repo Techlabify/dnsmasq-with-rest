@@ -24,7 +24,7 @@ app.post('/static-lease', (req, res) => {
         fs.writeFile(LEASE_FILE, newLeases.trim() + "\n", (err) => {
             if (err) return res.status(500).json({ error: "Failed to update lease file" });
 
-            exec("sudo systemctl restart dnsmasq", (error) => {
+            exec("service dnsmasq restart", (error) => {
                 if (error) return res.status(500).json({ error: "Failed to restart dnsmasq" });
                 res.json({ success: true, message: `Static lease added for ${mac} -> ${ip}` });
             });
@@ -45,7 +45,7 @@ app.delete('/static-lease', (req, res) => {
         fs.writeFile(LEASE_FILE, updatedLeases, (err) => {
             if (err) return res.status(500).json({ error: "Failed to update lease file" });
 
-            exec("sudo systemctl restart dnsmasq", (error) => {
+            exec("service dnsmasq restart", (error) => {
                 if (error) return res.status(500).json({ error: "Failed to restart dnsmasq" });
                 res.json({ success: true, message: `Static lease removed for ${mac}` });
             });

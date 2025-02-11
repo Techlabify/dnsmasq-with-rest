@@ -8,5 +8,4 @@ services:
     volumes:
       - ./dnsmasq.conf:/etc/dnsmasq.conf
       - ./dnsmasq-static.leases:/etc/dnsmasq-static.leases
-      - ./dnsmasq.leases:/var/lib/misc/dnsmasq.leases
     restart: unless-stopped

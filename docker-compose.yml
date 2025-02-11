@@ -1,0 +1,11 @@
+services:
+  techlabify-dnsmasq:
+    build: .
+    container_name: techlabify-dnsmasq
+    network_mode: "host"
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - ./dnsmasq.conf:/etc/dnsmasq.conf
+      - ./dnsmasq-static.leases:/etc/dnsmasq-static.leases
+    restart: unless-stopped

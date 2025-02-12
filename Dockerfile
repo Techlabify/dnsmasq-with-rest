@@ -1,7 +1,7 @@
 FROM node:22-alpine
 
 # Install dnsmasq
-RUN apk add -y dnsmasq
+RUN apk add dnsmasq
 
 # Configure dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf

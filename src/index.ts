@@ -89,7 +89,7 @@ function readJsonBody(req: IncomingMessage): Promise<unknown> {
 
 function restartDnsmasq(): Promise<void> {
 	return new Promise((resolve, reject) => {
-		exec("service dnsmasq restart", error => {
+		exec("rc-service dnsmasq restart", error => {
 			if (error) reject(new HTTPError(500, "Failed to restart dnsmasq"));
 			else resolve();
 		});

@@ -1,7 +1,7 @@
-FROM node:22
+FROM node:22-alpine
 
 # Install dnsmasq
-RUN apt-get update && apt-get install -y dnsmasq && rm -rf /var/lib/apt/lists/*
+RUN apk add -y dnsmasq
 
 # Configure dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf

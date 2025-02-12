@@ -2,9 +2,12 @@
   "name": "techlabify-dnsmasq",
   "version": "0.1.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "node dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -16,7 +19,8 @@
     "url": "https://github.com/Techlabify/techlabify-dnsmasq/issues"
   },
   "homepage": "https://github.com/Techlabify/techlabify-dnsmasq#readme",
-  "dependencies": {
-    "express": "^4.21.2"
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "typescript": "^5.7.3"
   }
 }

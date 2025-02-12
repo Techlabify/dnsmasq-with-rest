@@ -11,10 +11,14 @@ COPY dnsmasq-static.leases /etc/dnsmasq-static.leases
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
+
 COPY . ./
+
+RUN npm run build
+RUN npm rune prune --production
 
 # Expose ports for DHCP and HTTP API
 EXPOSE 67/UDP 3000
 
 # Start dnsmasq and the Node.js application
-CMD service dnsmasq start && node index.js
+CMD service dnsmasq start && npm start

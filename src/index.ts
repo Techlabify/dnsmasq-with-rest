@@ -7,24 +7,21 @@ const DYNAMIC_LEASE_FILE ="/var/lib/misc/dnsmasq.leases";
 
 let dnsmasq = spawn('dnsmasq', ['--no-daemon']); 
 
-dnsmasq.on('close', (code) => {
-  console.log(`dnsmasq process exited with code ${code}`);
-});
-
 dnsmasq.stdout.on('data', (data) => {
-  console.log(`stdout: ${data}`);
+  log(data);
 });
 
 dnsmasq.stderr.on('data', (data) => {
-  console.error(`stderr: ${data}`);
+  log(data);
 });
 
 dnsmasq.on('close', (code) => {
-  console.log(`dnsmasq process exited with code ${code}`);
+  log(`dnsmasq process exited with code ${code}`);
   dnsmasq = spawn('dnsmasq', ['--no-daemon']);
 });
 
 function restartDnsmasq(): Promise<void> {
+	log("Restarting dnsmasq");
 	dnsmasq.kill('SIGTERM');
 	return new Promise((resolve, reject) => {
 		dnsmasq.on('close', () => {

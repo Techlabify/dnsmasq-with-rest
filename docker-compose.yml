@@ -7,5 +7,4 @@ services:
       - NET_ADMIN
     volumes:
       - ./dnsmasq.conf:/etc/dnsmasq.conf
-      - ./dnsmasq-static.leases:/etc/dnsmasq-static.leases
     restart: unless-stopped

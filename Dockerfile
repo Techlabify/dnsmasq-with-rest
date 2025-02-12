@@ -1,9 +1,7 @@
 FROM node:22-alpine
 
 # Install dnsmasq
-RUN apk add dnsmasq openrc
-RUN mkdir /run/openrc
-RUN touch /run/openrc/softlevel
+RUN apk add dnsmasq
 
 # Configure dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf
@@ -23,4 +21,4 @@ RUN npm prune --production
 EXPOSE 67/UDP 3000
 
 # Start dnsmasq and the Node.js application
-CMD npm start
+CMD dnsmasq & npm start

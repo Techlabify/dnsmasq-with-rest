@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y dnsmasq && rm -rf /var/lib/apt/lists/*
 
 # Configure dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf
+RUN touch /etc/dnsmasq-static.leases
 
 # Copy application files
 WORKDIR /app

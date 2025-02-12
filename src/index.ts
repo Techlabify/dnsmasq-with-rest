@@ -8,11 +8,11 @@ const DYNAMIC_LEASE_FILE ="/var/lib/misc/dnsmasq.leases";
 let dnsmasq = spawn('dnsmasq', ['--no-daemon']); 
 
 dnsmasq.stdout.on('data', (data) => {
-  log(data);
+  log(`${data}`);
 });
 
 dnsmasq.stderr.on('data', (data) => {
-  log(data);
+  log(`${data}`);
 });
 
 dnsmasq.on('close', (code) => {

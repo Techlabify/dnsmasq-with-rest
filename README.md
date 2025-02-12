@@ -1,4 +1,4 @@
-# techlabify-dnsmasq
+# dnsmasq-with-rest
 
 A dnsmasq server with a Node REST API to add/list/remove static leases
 
@@ -82,3 +82,10 @@ Response:
   "status": "OK"
 }
 ```
+
+## License
+
+This project is licensed under the MIT License – see the [LICENSE](LICENSE) file for details.
+
+This project interacts with dnsmasq, which is licensed under the GNU General Public License v2. dnsmasq itself is not included in this project. More details about dnsmasq can be found at:
+http://www.thekelleys.org.uk/dnsmasq/doc.html

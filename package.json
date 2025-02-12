@@ -1,5 +1,5 @@
 {
-  "name": "techlabify-dnsmasq",
+  "name": "@techlabify/dnsmasq-with-rest",
   "version": "0.1.0",
   "description": "",
   "main": "dist/index.js",
@@ -13,8 +13,8 @@
     "type": "git",
     "url": "git+https://github.com/Techlabify/techlabify-dnsmasq.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Csaba Sipocz",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/Techlabify/techlabify-dnsmasq/issues"
   },

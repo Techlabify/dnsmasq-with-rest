@@ -1,9 +1,37 @@
 import { readFile, writeFile } from 'fs/promises';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import { createServer, IncomingMessage } from 'http';
 
 const LEASE_FILE = "/etc/dnsmasq-static.leases";
 const DYNAMIC_LEASE_FILE ="/var/lib/misc/dnsmasq.leases";
+
+let dnsmasq = spawn('dnsmasq', ['--no-daemon']); 
+
+dnsmasq.on('close', (code) => {
+  console.log(`dnsmasq process exited with code ${code}`);
+});
+
+dnsmasq.stdout.on('data', (data) => {
+  console.log(`stdout: ${data}`);
+});
+
+dnsmasq.stderr.on('data', (data) => {
+  console.error(`stderr: ${data}`);
+});
+
+dnsmasq.on('close', (code) => {
+  console.log(`dnsmasq process exited with code ${code}`);
+  dnsmasq = spawn('dnsmasq', ['--no-daemon']);
+});
+
+function restartDnsmasq(): Promise<void> {
+	dnsmasq.kill('SIGTERM');
+	return new Promise((resolve, reject) => {
+		dnsmasq.on('close', () => {
+			resolve();
+		})
+	});
+}
 
 interface StaticLease {
 	mac: string;
@@ -87,14 +115,7 @@ function readJsonBody(req: IncomingMessage): Promise<unknown> {
 	});
 }
 
-function restartDnsmasq(): Promise<void> {
-	return new Promise((resolve, reject) => {
-		exec("rc-service dnsmasq restart", error => {
-			if (error) reject(new HTTPError(500, "Failed to restart dnsmasq"));
-			else resolve();
-		});
-	});
-}
+
 
 function readJsonTypedBody<T>(req: IncomingMessage, guard: Guard<T>): Promise<T> {
 	return readJsonBody(req).then(data => {

@@ -21,4 +21,4 @@ RUN npm prune --production
 EXPOSE 67/UDP 3000
 
 # Start dnsmasq and the Node.js application
-CMD dnsmasq & npm start
+CMD npm start

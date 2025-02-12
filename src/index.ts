@@ -3,6 +3,7 @@ import { exec } from 'child_process';
 import { createServer, IncomingMessage } from 'http';
 
 const LEASE_FILE = "/etc/dnsmasq-static.leases";
+const DYNAMIC_LEASE_FILE ="/var/lib/misc/dnsmasq.leases";
 
 interface StaticLease {
 	mac: string;
@@ -33,6 +34,25 @@ function readLeases(): Promise<StaticLease[]> {
 			.map(line => {
 				const [mac, ip] = line.split(",");
 				return { mac, ip };
+		}));
+}
+
+interface DynamicLease {
+	expiration: number;
+	mac:string;
+	ip: string;
+	hostname: string;
+	clientId: string;
+}
+
+function readDynamicLeases(): Promise<DynamicLease[]> {
+	return readFile(DYNAMIC_LEASE_FILE, "utf-8")
+		.then(data => data
+			.split("\n")
+			.filter(line => line.trim() !== "" && !line.startsWith("#"))
+			.map(line => {
+				const [expiration, mac, ip, hostname, clientId] = line.split(" ");
+				return { expiration: parseInt(expiration), mac, ip, hostname, clientId };
 		}));
 }
 
@@ -91,6 +111,19 @@ function staticLeaseDeleteGuard(data: unknown): data is StaticLeaseDeleteData {
 }
 
 const server = createServer((req, res) => {
+	if (req.url === "/lease" && req.method === "GET") {
+		readDynamicLeases()
+			.then(leases => {
+				res.writeHead(200, { "Content-Type": "application/json" });
+				res.end(JSON.stringify(leases));
+			})
+			.catch(err => {
+				log(err.message || err);
+				res.writeHead(500, { "Content-Type": "application/json" });
+				res.end(JSON.stringify({ error: "Failed to read lease file" }));
+			});
+		return;
+	}
 	if (req.url === "/static-lease" && req.method === "GET") {
 		readLeases()
 			.then(leases => {

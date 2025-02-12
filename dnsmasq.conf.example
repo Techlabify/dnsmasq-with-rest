@@ -12,5 +12,5 @@ dhcp-option=3,10.10.5.1
 # Set the DNS server (Optional, use local or external)
 dhcp-option=6,8.8.8.8,8.8.4.4
 
-# Read static leases from an external file
+# You must keep this line! Read static leases from an external file. 
 dhcp-hostsfile=/etc/dnsmasq-static.leases

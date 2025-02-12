@@ -1,7 +1,9 @@
 FROM node:22-alpine
 
 # Install dnsmasq
-RUN apk add dnsmasq
+RUN apk add dnsmasq openrc
+RUN mkdir /run/openrc
+RUN touch /run/openrc/softlevel
 
 # Configure dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf

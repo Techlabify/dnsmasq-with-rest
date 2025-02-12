@@ -65,7 +65,12 @@ function removeLeaseResult(mac: string): Promise<StaticLease[]> {
 }
 
 function addLeaseResult(mac: string, ip: string): Promise<StaticLease[]> {
-	return removeLeaseResult(mac).then(leases => [...leases, { mac, ip }]);
+	return removeLeaseResult(mac).then(leases => {
+		if (leases.some(lease => lease.ip === ip)) {
+			throw new HTTPError(400, "IP address already assigned to another MAC address");
+		}
+		return [...leases, { mac, ip }];
+	});
 }
 
 function readJsonBody(req: IncomingMessage): Promise<unknown> {

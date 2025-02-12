@@ -14,7 +14,7 @@ RUN npm install
 COPY . ./
 
 RUN npm run build
-RUN npm rune prune --production
+RUN npm prune --production
 
 # Expose ports for DHCP and HTTP API
 EXPOSE 67/UDP 3000

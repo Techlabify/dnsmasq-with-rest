@@ -1,6 +1,6 @@
 # dnsmasq-with-rest
 
-A dnsmasq (DHCP) server with a REST API to add/list/remove static leases. 
+A containerized dnsmasq (DHCP) server with REST API to add/list/remove static leases.
 
 If you are looking for a quick solution to get/assign IPs in an automated deployment of multiple machines, this might be your thing.
 It will require less than two minutes to set up if you already have Docker (compose) installed.

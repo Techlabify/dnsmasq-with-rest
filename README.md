@@ -1,6 +1,12 @@
 # dnsmasq-with-rest
 
-A dnsmasq server with a Node REST API to add/list/remove static leases
+A dnsmasq (DHCP) server with a REST API to add/list/remove static leases. 
+
+If you are looking for a quick solution to get/assign IPs in an automated deployment of multiple machines, this might be your thing.
+It will require less than two minutes to set up if you already have Docker (compose) installed.
+
+The functionality of this package is intentioanlly kept simple, fast and lightweight. You can find complete [REST API solutions for dnsmasq](https://github.com/bpaquet/dnsmasq-rest-api), 
+if you want more granular functionalities at the expense of setup time.
 
 ## Install and run
 
@@ -89,3 +95,7 @@ This project is licensed under the MIT License – see the [LICENSE](LICENSE) fi
 
 This project interacts with dnsmasq, which is licensed under the GNU General Public License v2. dnsmasq itself is not included in this project. More details about dnsmasq can be found at:
 http://www.thekelleys.org.uk/dnsmasq/doc.html
+
+## Acknowledgements
+
+A big shoutout for all the suppoerters and contributors @ [dnsmasq](https://github.com/imp/dnsmasq) for their work.

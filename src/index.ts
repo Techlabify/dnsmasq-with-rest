@@ -171,7 +171,6 @@ const server = createServer((req, res) => {
 		return;
 	}
 	if (req.url === "/static-lease" && req.method === "POST") {
-		let leases: StaticLease[];
 		readJsonTypedBody(req, staticLeaseGuard)
 			.then(data => addLeaseResult(data.mac, data.ip))
 			.then(updatedLeases => persistLeases(updatedLeases))

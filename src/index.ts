@@ -91,7 +91,7 @@ function persistLeases(updatedLeases: StaticLease[]): Promise<void> {
 }
 
 function removeLeaseResult(mac: string): Promise<StaticLease[]> {
-	return readLeases().then(leases => leases.filter(lease => lease.mac !== mac));
+	return readLeases().then(leases => leases.filter(lease => lease.mac.toLowerCase() !== mac.toLowerCase()));
 }
 
 function addLeaseResult(mac: string, ip: string): Promise<StaticLease[]> {
@@ -99,7 +99,7 @@ function addLeaseResult(mac: string, ip: string): Promise<StaticLease[]> {
 		if (leases.some(lease => lease.ip === ip)) {
 			throw new HTTPError(400, "IP address already assigned to another MAC address");
 		}
-		return [...leases, { mac, ip }];
+		return [...leases, { mac: mac.toLowerCase(), ip }];
 	});
 }
 

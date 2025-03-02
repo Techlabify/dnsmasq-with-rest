@@ -1,33 +1,45 @@
 import { readFile, writeFile } from 'fs/promises';
-import { exec, spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import { createServer, IncomingMessage } from 'http';
 
 const LEASE_FILE = "/etc/dnsmasq-static.leases";
 const DYNAMIC_LEASE_FILE ="/var/lib/misc/dnsmasq.leases";
 
-let dnsmasq = spawn('dnsmasq', ['--no-daemon']); 
-
-dnsmasq.stdout.on('data', (data) => {
-  log(`${data}`);
-});
-
-dnsmasq.stderr.on('data', (data) => {
-  log(`${data}`);
-});
-
-dnsmasq.on('close', (code) => {
-  log(`dnsmasq process exited with code ${code}`);
-  dnsmasq = spawn('dnsmasq', ['--no-daemon']);
-});
+let dnsmasq = spawnDnsmasqProcess();
 
 function restartDnsmasq(): Promise<void> {
 	log("Restarting dnsmasq");
 	dnsmasq.kill('SIGTERM');
 	return new Promise((resolve, reject) => {
+		
+		const timeout = setTimeout(() => {
+			log("Killing dnsmasq process");
+			dnsmasq.kill('SIGKILL');
+		}, 3000);
 		dnsmasq.on('close', () => {
+			clearTimeout(timeout);
 			resolve();
 		})
 	});
+}
+
+function spawnDnsmasqProcess(): ChildProcessWithoutNullStreams {
+	log("Spawning dnsmasq process");
+	const proc = spawn('dnsmasq', ['--no-daemon']);
+	proc.stdout.on('data', (data) => {
+		log(`${data}`);
+	});
+	proc.stderr.on('data', (data) => {
+		log(`${data}`);
+	});
+	proc.on('close', (code) => {
+		log(`dnsmasq process exited with code ${code}`);
+		setTimeout(() => {
+			dnsmasq = spawnDnsmasqProcess();
+		}, 200);
+	});
+
+	return proc;
 }
 
 interface StaticLease {
@@ -52,6 +64,7 @@ function log(...args: any[]): void {
 }
 
 function readLeases(): Promise<StaticLease[]> {
+	log("Reading static leases");
 	return readFile(LEASE_FILE, "utf8")
 		.then(data => data
 			.split("\n")
@@ -71,6 +84,7 @@ interface DynamicLease {
 }
 
 function readDynamicLeases(): Promise<DynamicLease[]> {
+	log("Reading dynamic leases");
 	return readFile(DYNAMIC_LEASE_FILE, "utf-8")
 		.then(data => data
 			.split("\n")
@@ -82,19 +96,22 @@ function readDynamicLeases(): Promise<DynamicLease[]> {
 }
 
 function persistLeases(updatedLeases: StaticLease[]): Promise<void> {
+	log("Persisting leases");
 	return writeFile(LEASE_FILE, updatedLeases.map(lease => `${lease.mac},${lease.ip}`).join("\n"));
 }
 
 function removeLeaseResult(mac: string): Promise<StaticLease[]> {
-	return readLeases().then(leases => leases.filter(lease => lease.mac !== mac));
+	log(`Removing any existing static lease for ${mac}`);
+	return readLeases().then(leases => leases.filter(lease => lease.mac.toLowerCase() !== mac.toLowerCase()));
 }
 
 function addLeaseResult(mac: string, ip: string): Promise<StaticLease[]> {
+	log(`Adding static lease for ${mac} -> ${ip}`);
 	return removeLeaseResult(mac).then(leases => {
 		if (leases.some(lease => lease.ip === ip)) {
 			throw new HTTPError(400, "IP address already assigned to another MAC address");
 		}
-		return [...leases, { mac, ip }];
+		return [...leases, { mac: mac.toLowerCase(), ip }];
 	});
 }
 
@@ -161,7 +178,6 @@ const server = createServer((req, res) => {
 		return;
 	}
 	if (req.url === "/static-lease" && req.method === "POST") {
-		let leases: StaticLease[];
 		readJsonTypedBody(req, staticLeaseGuard)
 			.then(data => addLeaseResult(data.mac, data.ip))
 			.then(updatedLeases => persistLeases(updatedLeases))

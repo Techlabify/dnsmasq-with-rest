@@ -24,7 +24,12 @@ function restartDnsmasq(): Promise<void> {
 	log("Restarting dnsmasq");
 	dnsmasq.kill('SIGTERM');
 	return new Promise((resolve, reject) => {
+		
+		const timeout = setTimeout(() => {
+			dnsmasq.kill('SIGKILL');
+		}, 3000);
 		dnsmasq.on('close', () => {
+			clearTimeout(timeout);
 			resolve();
 		})
 	});

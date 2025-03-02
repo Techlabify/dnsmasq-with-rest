@@ -1,24 +1,11 @@
 import { readFile, writeFile } from 'fs/promises';
-import { exec, spawn } from 'child_process';
+import { ChildProcessWithoutNullStreams, exec, spawn } from 'child_process';
 import { createServer, IncomingMessage } from 'http';
 
 const LEASE_FILE = "/etc/dnsmasq-static.leases";
 const DYNAMIC_LEASE_FILE ="/var/lib/misc/dnsmasq.leases";
 
-let dnsmasq = spawn('dnsmasq', ['--no-daemon']); 
-
-dnsmasq.stdout.on('data', (data) => {
-  log(`${data}`);
-});
-
-dnsmasq.stderr.on('data', (data) => {
-  log(`${data}`);
-});
-
-dnsmasq.on('close', (code) => {
-  log(`dnsmasq process exited with code ${code}`);
-  dnsmasq = spawn('dnsmasq', ['--no-daemon']);
-});
+let dnsmasq = spawnDnsmasqProcess();
 
 function restartDnsmasq(): Promise<void> {
 	log("Restarting dnsmasq");
@@ -26,6 +13,7 @@ function restartDnsmasq(): Promise<void> {
 	return new Promise((resolve, reject) => {
 		
 		const timeout = setTimeout(() => {
+			log("Killing dnsmasq process");
 			dnsmasq.kill('SIGKILL');
 		}, 3000);
 		dnsmasq.on('close', () => {
@@ -33,6 +21,25 @@ function restartDnsmasq(): Promise<void> {
 			resolve();
 		})
 	});
+}
+
+function spawnDnsmasqProcess(): ChildProcessWithoutNullStreams {
+	log("Spawning dnsmasq process");
+	const proc = spawn('dnsmasq', ['--no-daemon']);
+	proc.stdout.on('data', (data) => {
+		log(`${data}`);
+	});
+	proc.stderr.on('data', (data) => {
+		log(`${data}`);
+	});
+	proc.on('close', (code) => {
+		log(`dnsmasq process exited with code ${code}`);
+		setTimeout(() => {
+			dnsmasq = spawnDnsmasqProcess();
+		}, 200);
+	});
+
+	return proc;
 }
 
 interface StaticLease {

@@ -101,7 +101,7 @@ function persistLeases(updatedLeases: StaticLease[]): Promise<void> {
 }
 
 function removeLeaseResult(mac: string): Promise<StaticLease[]> {
-	log(`Removing static lease for ${mac}`);
+	log(`Removing any existing static lease for ${mac}`);
 	return readLeases().then(leases => leases.filter(lease => lease.mac.toLowerCase() !== mac.toLowerCase()));
 }
 

@@ -57,6 +57,7 @@ function log(...args: any[]): void {
 }
 
 function readLeases(): Promise<StaticLease[]> {
+	log("Reading static leases");
 	return readFile(LEASE_FILE, "utf8")
 		.then(data => data
 			.split("\n")
@@ -76,6 +77,7 @@ interface DynamicLease {
 }
 
 function readDynamicLeases(): Promise<DynamicLease[]> {
+	log("Reading dynamic leases");
 	return readFile(DYNAMIC_LEASE_FILE, "utf-8")
 		.then(data => data
 			.split("\n")
@@ -87,14 +89,17 @@ function readDynamicLeases(): Promise<DynamicLease[]> {
 }
 
 function persistLeases(updatedLeases: StaticLease[]): Promise<void> {
+	log("Persisting leases");
 	return writeFile(LEASE_FILE, updatedLeases.map(lease => `${lease.mac},${lease.ip}`).join("\n"));
 }
 
 function removeLeaseResult(mac: string): Promise<StaticLease[]> {
+	log(`Removing static lease for ${mac}`);
 	return readLeases().then(leases => leases.filter(lease => lease.mac.toLowerCase() !== mac.toLowerCase()));
 }
 
 function addLeaseResult(mac: string, ip: string): Promise<StaticLease[]> {
+	log(`Adding static lease for ${mac} -> ${ip}`);
 	return removeLeaseResult(mac).then(leases => {
 		if (leases.some(lease => lease.ip === ip)) {
 			throw new HTTPError(400, "IP address already assigned to another MAC address");

@@ -15,14 +15,16 @@ FROM alpine
 
 WORKDIR /app
 
-# Install dnsmasq
+# Install dnsmasq & clean up cache
 RUN apk add dnsmasq && rm -rf /var/cache/apk/*
 
 # Configure dnsmasq
 COPY dnsmasq.conf /etc/dnsmasq.conf
 COPY dnsmasq-static.leases /etc/dnsmasq-static.leases
+# Copy over node from build layer
 COPY --from=build /usr/local/bin/node /usr/local/bin/
 COPY --from=build /usr/lib /usr/lib/
+# Copy over built application
 COPY --from=build /app/dist /app/
 
 # Expose ports for DHCP and HTTP API

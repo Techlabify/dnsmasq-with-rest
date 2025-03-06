@@ -1,12 +1,5 @@
-FROM node:22-alpine
-
-# Install dnsmasq
-RUN apk add dnsmasq
-
-# Configure dnsmasq
-COPY dnsmasq.conf /etc/dnsmasq.conf
-COPY dnsmasq-static.leases /etc/dnsmasq-static.leases
-
+# Build layer
+FROM node:22-alpine AS build
 # Copy application files
 WORKDIR /app
 COPY package*.json ./
@@ -17,8 +10,23 @@ COPY . ./
 RUN npm run build
 RUN npm prune --production
 
+# Production layer
+FROM alpine
+
+WORKDIR /app
+
+# Install dnsmasq
+RUN apk add dnsmasq && rm -rf /var/cache/apk/*
+
+# Configure dnsmasq
+COPY dnsmasq.conf /etc/dnsmasq.conf
+COPY dnsmasq-static.leases /etc/dnsmasq-static.leases
+COPY --from=build /usr/local/bin/node /usr/local/bin/
+COPY --from=build /usr/lib /usr/lib/
+COPY --from=build /app/dist /app/
+
 # Expose ports for DHCP and HTTP API
 EXPOSE 67/UDP 3000
 
 # Start dnsmasq and the Node.js application
-CMD npm start
+CMD ["node", "index.js"]
